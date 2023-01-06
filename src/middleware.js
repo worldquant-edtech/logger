@@ -3,21 +3,27 @@ const logger = require('./logger');
 
 const IGNORE_UA_REG = /^(GoogleHC|kube-probe)/;
 
-function middleware(ctx, next) {
-  if (isAllowedRequest(ctx)) {
-    const start = new Date();
-    ctx.res.once('finish', () => {
-      logger.formatRequest({
-        ...getRequestInfo(ctx),
-        latency: new Date() - start,
+function middleware(options) {
+  return (ctx, next) => {
+    if (isAllowedRequest(ctx, options)) {
+      const start = new Date();
+      ctx.res.once('finish', () => {
+        logger.formatRequest({
+          ...getRequestInfo(ctx),
+          latency: new Date() - start,
+        });
       });
-    });
-  }
-  return next();
+    }
+    return next();
+  };
 }
 
-function isAllowedRequest(ctx) {
-  return !IGNORE_UA_REG.test(ctx.request.headers['user-agent'] || '');
+function isAllowedRequest(ctx, options = {}) {
+  const { ignoreUserAgents = [IGNORE_UA_REG] } = options;
+  const ua = ctx.request.headers['user-agent'] || '';
+  return ignoreUserAgents.some((test) => {
+    return !ua.match(test);
+  });
 }
 
 function getRequestInfo(ctx) {

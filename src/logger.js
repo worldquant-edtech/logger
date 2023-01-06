@@ -3,7 +3,7 @@ const GoogleCloudLogger = require('./loggers/GoogleCloudLogger');
 
 let logger;
 
-function wrapLogger(level) {
+function delegate(level) {
   return (...args) => {
     return logger[level](...args);
   };
@@ -23,10 +23,10 @@ useConsole();
 module.exports = {
   useConsole,
   useGoogleCloud,
-  formatRequest: wrapLogger('formatRequest'),
-  trace: wrapLogger('trace'),
-  debug: wrapLogger('debug'),
-  info: wrapLogger('info'),
-  warn: wrapLogger('warn'),
-  error: wrapLogger('error'),
+  formatRequest: delegate('formatRequest'),
+  trace: delegate('trace'),
+  debug: delegate('debug'),
+  info: delegate('info'),
+  warn: delegate('warn'),
+  error: delegate('error'),
 };

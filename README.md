@@ -15,22 +15,30 @@ yarn install @bedrockio/logger
 
 ## Usage
 
-To enable Google Cloud compatible logs:
-
 ```js
 const logger = require('@bedrockio/logger');
-logger.useGoogleCloud();
-```
-
-With Google Cloud tracing:
-
-```js
-// TODO: figure this out
-const logger = require('@bedrockio/logger');
-logger.useGoogleCloud(logger.useGoogleCloudTracing());
+logger.setupGoogleCloud({
+  // Set up gcloud structured logging. Default true.
+  logging: true,
+  // Set up gcloud tracing. Default false.
+  tracing: false,
+});
 ```
 
 This initialization code should be added as early as possible in your application.
+
+### Options
+
+Enable both logging and tracing and tell the tracing to ignore specific paths.
+
+```js
+const logger = require('@bedrockio/logger');
+logger.setupGoogleCloud({
+  tracing: {
+    ignoreIncomingPaths: ['/'],
+  },
+});
+```
 
 ## Log Levels
 

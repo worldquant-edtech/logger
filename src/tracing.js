@@ -10,9 +10,11 @@ const { MongooseInstrumentation } = require('@opentelemetry/instrumentation-mong
 
 const { isTTY } = require('./utils/env');
 
-function useGoogleCloudTracing() {
+function useGoogleCloudTracing(options = {}) {
   // https://cloud.google.com/trace/docs/setup/nodejs-ot#gke
   // https://github.com/open-telemetry/opentelemetry-js/tree/main/packages/opentelemetry-sdk-trace-node
+
+  const { ignoreIncomingPaths = [] } = options;
 
   const provider = new NodeTracerProvider();
 
@@ -23,7 +25,15 @@ function useGoogleCloudTracing() {
   }
 
   registerInstrumentations({
-    instrumentations: [new MongooseInstrumentation(), new KoaInstrumentation(), new HttpInstrumentation()],
+    instrumentations: [
+      new MongooseInstrumentation(),
+      new KoaInstrumentation(),
+      new HttpInstrumentation({
+        http: {
+          ignoreIncomingPaths,
+        },
+      }),
+    ],
     tracerProvider: provider,
   });
 

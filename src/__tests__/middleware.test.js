@@ -50,7 +50,7 @@ describe('console middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {
+    middleware()(ctx, () => {
       jest.advanceTimersByTime(100);
     });
     ctx.res.end();
@@ -68,7 +68,7 @@ describe('console middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {});
+    middleware()(ctx, () => {});
     ctx.res.end();
     expect(getLast()).toBeUndefined();
   });
@@ -84,7 +84,45 @@ describe('console middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {});
+    middleware()(ctx, () => {});
+    ctx.res.end();
+    expect(getLast()).toBeUndefined();
+  });
+
+  it('should ignoring custom headers by string', () => {
+    const options = {
+      ignoreUserAgents: ['Foobar'],
+    };
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 200,
+      request: {
+        headers: {
+          'user-agent': 'Foobar',
+        },
+      },
+    });
+    middleware(options)(ctx, () => {});
+    ctx.res.end();
+    expect(getLast()).toBeUndefined();
+  });
+
+  it('should ignoring custom headers by regex', () => {
+    const options = {
+      ignoreUserAgents: [/^foo/i],
+    };
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 200,
+      request: {
+        headers: {
+          'user-agent': 'Foobar',
+        },
+      },
+    });
+    middleware(options)(ctx, () => {});
     ctx.res.end();
     expect(getLast()).toBeUndefined();
   });
@@ -106,7 +144,7 @@ describe('google cloud middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {
+    middleware()(ctx, () => {
       jest.advanceTimersByTime(100);
     });
     ctx.res.end();
@@ -134,7 +172,7 @@ describe('google cloud middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {});
+    middleware()(ctx, () => {});
     ctx.res.end();
     expect(getLast()).toBeUndefined();
   });
@@ -150,7 +188,7 @@ describe('google cloud middleware', () => {
         },
       },
     });
-    middleware(ctx, () => {});
+    middleware()(ctx, () => {});
     ctx.res.end();
     expect(getLast()).toBeUndefined();
   });
