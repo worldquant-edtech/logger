@@ -20,8 +20,8 @@ const logger = require('@bedrockio/logger');
 logger.setupGoogleCloud({
   // Set up gcloud structured logging. Default true.
   logging: true,
-  // Set up gcloud tracing. Default false.
-  tracing: false,
+  // Set up gcloud tracing. Default true.
+  tracing: true,
 });
 ```
 
