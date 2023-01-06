@@ -2,12 +2,11 @@
   "name": "@bedrockio/logger",
   "version": "1.0.0",
   "description": "Structured logger for Bedrock applications.",
-  "main": "src/index.js",
   "scripts": {
     "test": "jest",
     "lint": "eslint"
   },
-  "license": "MIT",
+  "main": "src/index.js",
   "contributors": [
     {
       "name": "Kaare Larsen",
@@ -18,6 +17,11 @@
       "email": "andrew@rekall.ai"
     }
   ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bedrockio/logger"
+  },
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^1.2.0",
     "@opentelemetry/api": "^1.3.0",
