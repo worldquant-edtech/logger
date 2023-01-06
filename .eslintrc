@@ -1,0 +1,12 @@
+{
+  "env": {
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "extends": [
+    "plugin:bedrock/recommended",
+    "plugin:bedrock/jest"
+  ]
+}
