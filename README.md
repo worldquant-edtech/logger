@@ -77,7 +77,7 @@ const Koa = require('koa');
 const logger = require('@bedrockio/logging');
 
 const app = new Koa();
-app.use(logger.middleware);
+app.use(logger.middleware());
 ```
 
 ### Logger Methods
