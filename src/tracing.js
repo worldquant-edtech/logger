@@ -1,16 +1,20 @@
-const api = require('@opentelemetry/api');
-const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-const { TraceExporter } = require('@google-cloud/opentelemetry-cloud-trace-exporter');
+import { trace, context as apiContext } from '@opentelemetry/api';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter';
 
-const { ConsoleSpanExporter, BatchSpanProcessor, SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
-const { registerInstrumentations } = require('@opentelemetry/instrumentation');
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const { KoaInstrumentation } = require('@opentelemetry/instrumentation-koa');
-const { MongooseInstrumentation } = require('@opentelemetry/instrumentation-mongoose');
+import {
+  ConsoleSpanExporter,
+  BatchSpanProcessor,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-base';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { KoaInstrumentation } from '@opentelemetry/instrumentation-koa';
+import { MongooseInstrumentation } from '@opentelemetry/instrumentation-mongoose';
 
-const { isTTY } = require('./utils/env');
+import { isTTY } from './utils/env';
 
-function useGoogleCloudTracing(options = {}) {
+export function useGoogleCloudTracing(options = {}) {
   // https://cloud.google.com/trace/docs/setup/nodejs-ot#gke
   // https://github.com/open-telemetry/opentelemetry-js/tree/main/packages/opentelemetry-sdk-trace-node
 
@@ -19,7 +23,9 @@ function useGoogleCloudTracing(options = {}) {
   const provider = new NodeTracerProvider();
 
   if (isTTY) {
-    provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+    provider.addSpanProcessor(
+      new SimpleSpanProcessor(new ConsoleSpanExporter())
+    );
   } else {
     provider.addSpanProcessor(new BatchSpanProcessor(new TraceExporter()));
   }
@@ -40,8 +46,8 @@ function useGoogleCloudTracing(options = {}) {
   provider.register();
 }
 
-function getTracePayload() {
-  const context = api.trace.getSpanContext(api.context.active());
+export function getTracePayload() {
+  const context = trace.getSpanContext(apiContext.active());
   if (context) {
     const { spanId, traceId, traceFlags } = context;
     return {
@@ -51,8 +57,3 @@ function getTracePayload() {
     };
   }
 }
-
-module.exports = {
-  getTracePayload,
-  useGoogleCloudTracing,
-};

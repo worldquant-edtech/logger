@@ -1,6 +1,7 @@
-const consoleSync = require('console');
-const consoleAsync = require('../utils/async-console');
-const { isTTY } = require('../utils/env');
+import consoleSync from 'console';
+
+import consoleAsync from '../utils/async-console';
+import { isTTY } from '../utils/env';
 
 const console = isTTY ? consoleSync : consoleAsync;
 
@@ -12,9 +13,16 @@ const console = isTTY ? consoleSync : consoleAsync;
 // - WARNING
 // - ERROR
 
-const RESERVED_FIELDS = ['message', 'severity', 'httpRequest', 'timestamp', 'time', 'log'];
+const RESERVED_FIELDS = [
+  'message',
+  'severity',
+  'httpRequest',
+  'timestamp',
+  'time',
+  'log',
+];
 
-class GoogleCloudLogger {
+export default class GoogleCloudLogger {
   constructor(options = {}) {
     this.options = options;
   }
@@ -161,5 +169,3 @@ function printf(args) {
   }
   return args;
 }
-
-module.exports = GoogleCloudLogger;

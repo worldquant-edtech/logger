@@ -1,14 +1,15 @@
-const bytes = require('bytes');
-const logger = require('./logger');
+import bytes from 'bytes';
+
+import { formatRequest } from './logger';
 
 const IGNORE_UA_REG = /^(GoogleHC|kube-probe)/;
 
-function middleware(options) {
+export default function middleware(options) {
   return (ctx, next) => {
     if (isAllowedRequest(ctx, options)) {
       const start = new Date();
       ctx.res.once('finish', () => {
-        logger.formatRequest({
+        formatRequest({
           ...getRequestInfo(ctx),
           latency: new Date() - start,
         });
@@ -56,5 +57,3 @@ function getRequestInfo(ctx) {
     size,
   };
 }
-
-module.exports = middleware;

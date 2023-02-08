@@ -1,11 +1,11 @@
-const stdout = require('stdout-stream');
+import stdout from 'stdout-stream';
 
 function stream(...args) {
   const output = args.map(String).join(' ');
   stdout.write(output + '\n');
 }
 
-module.exports = {
+export default {
   log: stream,
   warn: stream,
   info: stream,

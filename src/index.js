@@ -1,6 +1,14 @@
-const logger = require('./logger');
-const middleware = require('./middleware');
-const tracing = require('./tracing');
+import {
+  trace,
+  debug,
+  info,
+  warn,
+  error,
+  formatRequest,
+  useGoogleCloud,
+} from './logger';
+import middleware from './middleware';
+import { useGoogleCloudTracing, getTracePayload } from './tracing';
 
 const DEFAULT_OPTIONS = {
   logging: true,
@@ -14,20 +22,25 @@ function setupGoogleCloud(options) {
   };
 
   if (options.logging) {
-    logger.useGoogleCloud({
-      getTracePayload: tracing.getTracePayload,
+    useGoogleCloud({
+      getTracePayload: getTracePayload,
     });
   }
 
   if (options.tracing) {
-    tracing.useGoogleCloudTracing({
+    useGoogleCloudTracing({
       ignoreIncomingPaths: options.tracing?.ignoreIncomingPaths,
     });
   }
 }
 
-module.exports = {
+export default {
+  trace,
+  debug,
+  info,
+  warn,
+  error,
   setupGoogleCloud,
+  formatRequest,
   middleware,
-  ...logger,
 };

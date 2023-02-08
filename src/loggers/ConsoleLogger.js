@@ -1,9 +1,10 @@
-const console = require('console');
-const { gray, yellow, red, cyan, green } = require('kleur');
+import console from 'console';
+
+import { gray, yellow, red, cyan, green } from 'kleur';
 
 const LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error'];
 
-class ConsoleLogger {
+export default class ConsoleLogger {
   debug(...args) {
     return this.print('debug', ...args);
   }
@@ -86,5 +87,3 @@ function getDateTag() {
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return gray(`[${date.toISOString().slice(0, -5)}]`);
 }
-
-module.exports = ConsoleLogger;

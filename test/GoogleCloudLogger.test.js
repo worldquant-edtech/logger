@@ -1,9 +1,8 @@
-const GoogleCloudLogger = require('../loggers/GoogleCloudLogger');
-const { getLastParsed, reset } = require('console');
+import { getLastParsed, reset } from 'console';
+
+import GoogleCloudLogger from '../src/loggers/GoogleCloudLogger';
 
 const logger = new GoogleCloudLogger();
-
-jest.mock('console');
 
 afterEach(() => {
   reset();

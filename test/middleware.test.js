@@ -1,11 +1,9 @@
-const logger = require('../logger');
-const middleware = require('../middleware');
-const { getLast, getLastParsed, reset } = require('console');
+import { getLast, getLastParsed, reset } from 'console';
+
+import { useConsole, useGoogleCloud } from '../src/logger';
+import middleware from '../src/middleware';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
-
-jest.mock('kleur');
-jest.mock('console');
 
 afterEach(() => {
   reset();
@@ -36,7 +34,7 @@ function createContext(obj) {
 
 describe('console middleware', () => {
   beforeAll(() => {
-    logger.useConsole();
+    useConsole();
   });
 
   it('should log a request', () => {
@@ -54,7 +52,9 @@ describe('console middleware', () => {
       jest.advanceTimersByTime(100);
     });
     ctx.res.end();
-    expect(getLast()).toBe('[2020-01-01T00:00:00]  INFO POST   200 /foo 100ms 2KB');
+    expect(getLast()).toBe(
+      '[2020-01-01T00:00:00]  INFO POST   200 /foo 100ms 2KB'
+    );
   });
 
   it('should ignore GCE health checks', () => {
@@ -130,7 +130,7 @@ describe('console middleware', () => {
 
 describe('google cloud middleware', () => {
   beforeAll(() => {
-    logger.useGoogleCloud();
+    useGoogleCloud();
   });
 
   it('should log a request', () => {

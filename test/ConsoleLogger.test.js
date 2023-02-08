@@ -1,11 +1,10 @@
-const ConsoleLogger = require('../loggers/ConsoleLogger');
-const { getLast, getLastArgs, reset } = require('console');
+import { getLast, getLastArgs, reset } from 'console';
+
+import ConsoleLogger from '../src/loggers/ConsoleLogger';
+
 const logger = new ConsoleLogger();
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
-
-jest.mock('kleur');
-jest.mock('console');
 
 afterEach(() => {
   reset();
@@ -29,7 +28,11 @@ describe('basic logging', () => {
 
   it('should be able to use interpolation', async () => {
     logger.info('%s -> %s', 'foo', 'bar');
-    expect(getLastArgs()).toEqual(['[2020-01-01T00:00:00]  INFO %s -> %s', 'foo', 'bar']);
+    expect(getLastArgs()).toEqual([
+      '[2020-01-01T00:00:00]  INFO %s -> %s',
+      'foo',
+      'bar',
+    ]);
   });
 });
 
