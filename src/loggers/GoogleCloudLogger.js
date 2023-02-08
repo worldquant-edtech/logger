@@ -1,9 +1,5 @@
-import consoleSync from 'console';
-
 import consoleAsync from '../utils/async-console';
 import { isTTY } from '../utils/env';
-
-const console = isTTY ? consoleSync : consoleAsync;
 
 // Note: GCP severity levels are described here:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
@@ -118,8 +114,14 @@ export default class GoogleCloudLogger {
     if (getTracePayload) {
       Object.assign(payload, getTracePayload());
     }
-    console.log(JSON.stringify(payload));
+    log(JSON.stringify(payload));
   }
+}
+
+// Wrap this to allow testing.
+function log(msg) {
+  const console = isTTY ? global.console : consoleAsync;
+  console.log(msg);
 }
 
 function isPrimitive(arg) {

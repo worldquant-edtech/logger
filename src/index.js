@@ -5,6 +5,8 @@ import {
   warn,
   error,
   formatRequest,
+  useConsole,
+  useFormatted,
   useGoogleCloud,
 } from './logger';
 import middleware from './middleware';
@@ -43,4 +45,7 @@ export default {
   setupGoogleCloud,
   formatRequest,
   middleware,
+  useConsole,
+  useFormatted,
+  useGoogleCloud,
 };

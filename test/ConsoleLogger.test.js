@@ -1,62 +1,79 @@
-import { getLast, getLastArgs, reset } from 'console';
-
+import { mockConsole, unmockConsole, getMessages } from './mocks/console';
 import ConsoleLogger from '../src/loggers/ConsoleLogger';
 
 const logger = new ConsoleLogger();
 
-jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+beforeEach(() => {
+  mockConsole();
+});
 
-afterEach(() => {
-  reset();
+afterAll(() => {
+  unmockConsole();
 });
 
 describe('basic logging', () => {
-  it('info', async () => {
+  it('should not log debug by default', async () => {
+    logger.debug('msg');
+    expect(getMessages()).toEqual([]);
+  });
+
+  it('should log info', async () => {
     logger.info('msg');
-    expect(getLast()).toBe('[2020-01-01T00:00:00]  INFO msg');
+    expect(getMessages()).toEqual([['info', 'msg']]);
   });
 
-  it('warn', async () => {
+  it('should log warn', async () => {
     logger.warn('msg');
-    expect(getLast()).toBe('[2020-01-01T00:00:00]  WARN msg');
+    expect(getMessages()).toEqual([['warn', 'msg']]);
   });
 
-  it('error', async () => {
+  it('should log error', async () => {
     logger.error('msg');
-    expect(getLast()).toBe('[2020-01-01T00:00:00] ERROR msg');
+    expect(getMessages()).toEqual([['error', 'msg']]);
   });
 
   it('should be able to use interpolation', async () => {
     logger.info('%s -> %s', 'foo', 'bar');
-    expect(getLastArgs()).toEqual([
-      '[2020-01-01T00:00:00]  INFO %s -> %s',
-      'foo',
-      'bar',
-    ]);
-  });
-});
-
-describe('min level', () => {
-  it('should not log debug by default', async () => {
-    logger.debug('msg');
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([['info', '%s -> %s', 'foo', 'bar']]);
   });
 
-  it('should log debug when min level set', async () => {
+  it('should log debug when level set', async () => {
     process.env.LOG_LEVEL = 'debug';
     logger.debug('msg');
-    expect(getLast()).toBe('[2020-01-01T00:00:00] DEBUG msg');
+    expect(getMessages()).toEqual([['debug', 'msg']]);
     process.env.LOG_LEVEL = 'info';
   });
 
-  it('should only log error messages', async () => {
+  it('should only log error messages when level set', async () => {
     process.env.LOG_LEVEL = 'error';
     logger.debug('msg');
     logger.info('msg');
     logger.warn('msg');
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
     logger.error('msg');
-    expect(getLast()).toBe('[2020-01-01T00:00:00] ERROR msg');
+    expect(getMessages()).toEqual([['error', 'msg']]);
     process.env.LOG_LEVEL = 'info';
+  });
+
+  it('should format a successful request', async () => {
+    logger.formatRequest({
+      method: 'POST',
+      path: '/',
+      status: 200,
+      latency: 50,
+      size: '500B',
+    });
+    expect(getMessages()).toEqual([['info', 'POST   200 / 50ms 500B']]);
+  });
+
+  it('should format a bad request', async () => {
+    logger.formatRequest({
+      method: 'POST',
+      path: '/',
+      status: 500,
+      latency: 50,
+      size: '500B',
+    });
+    expect(getMessages()).toEqual([['error', 'POST   500 / 50ms 500B']]);
   });
 });

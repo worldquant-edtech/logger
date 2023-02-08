@@ -1,30 +1,36 @@
-let lastArgs;
+export const realConsole = global.console;
 
-export default {
-  log: delegate,
-  info: delegate,
-  trace: delegate,
-  debug: delegate,
-  error: delegate,
-  warn: delegate,
+let messages;
+
+function delegate(level) {
+  return (...args) => {
+    messages.push([level, ...args]);
+  };
+}
+
+const fakeConsole = {
+  log: delegate('log'),
+  debug: delegate('debug'),
+  info: delegate('info'),
+  warn: delegate('warn'),
+  error: delegate('error'),
 };
 
-export function getLast() {
-  return lastArgs?.join(' ');
+export function mockConsole() {
+  messages = [];
+  global.console = fakeConsole;
 }
 
-export function getLastArgs() {
-  return lastArgs;
+export function unmockConsole() {
+  global.console = realConsole;
 }
 
-export function getLastParsed() {
-  return JSON.parse(getLast());
+export function getMessages() {
+  return messages;
 }
 
-export function reset() {
-  lastArgs = undefined;
-}
-
-function delegate(...args) {
-  lastArgs = args;
+export function getParsedMessages() {
+  return messages.map(([level, msg]) => {
+    return [level, JSON.parse(msg)];
+  });
 }

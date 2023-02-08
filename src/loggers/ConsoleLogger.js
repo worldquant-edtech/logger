@@ -1,40 +1,38 @@
-import console from 'console';
+import { red, yellow, gray } from 'kleur';
 
-import { gray, yellow, red, cyan, green } from 'kleur';
+const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
-const LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error'];
-
-export default class ConsoleLogger {
+export default class TagLogger {
   debug(...args) {
-    return this.print('debug', ...args);
+    return this.emit('debug', ...args);
   }
 
   info(...args) {
-    return this.print('info', ...args);
+    return this.emit('info', ...args);
   }
 
   warn(...args) {
-    return this.print('warn', ...args);
+    return this.emit('warn', ...args);
   }
 
   error(...args) {
-    return this.print('error', ...args);
+    return this.emit('error', ...args);
+  }
+
+  emit(level, ...args) {
+    if (LOG_LEVELS.indexOf(level) >= getMinLevel()) {
+      this.print(level, ...args);
+    }
   }
 
   print(level, ...args) {
-    if (LOG_LEVELS.indexOf(level) < getMinLevel()) {
-      return '';
-    }
-
     const fn = console[level];
-
-    let msg = `${getDateTag()} ${getLevelTag(level)}`;
+    let msg = '';
     if (typeof args[0] === 'string') {
       const [first, ...rest] = args;
-      msg += ` ${first}`;
+      msg += this.formatForLevel(level, first);
       args = rest;
     }
-
     fn(msg, ...args);
   }
 
@@ -42,10 +40,28 @@ export default class ConsoleLogger {
     let { method, path, status, latency, size } = info;
     const level = status < 500 ? 'info' : 'error';
     method = method.padEnd(6, ' ');
-    status = getStatusCode(status);
-    const meta = gray(`${path} ${latency}ms ${size}`);
+    status = this.formatStatus(status);
+    const meta = this.formatMeta(`${path} ${latency}ms ${size}`);
     const msg = `${method} ${status} ${meta}`;
     this[level](msg);
+  }
+
+  formatStatus(status) {
+    return status;
+  }
+
+  formatMeta(meta) {
+    return meta;
+  }
+
+  formatForLevel(level, msg) {
+    if (level === 'error') {
+      return red(msg);
+    } else if (level === 'warn') {
+      return yellow(msg);
+    } else {
+      return gray(msg);
+    }
   }
 }
 
@@ -55,35 +71,4 @@ function getMinLevel() {
     throw new Error(`Invalid log level. Must be one of ${LOG_LEVELS}`);
   }
   return minLevel;
-}
-
-function getLevelTag(level) {
-  let tag = level.toUpperCase().padStart(5, ' ');
-  if (level === 'error') {
-    tag = red(tag);
-  } else if (level === 'warn') {
-    tag = yellow(tag);
-  } else {
-    tag = gray(tag);
-  }
-  return tag;
-}
-
-function getStatusCode(status) {
-  if (status >= 500) {
-    return red(status);
-  } else if (status >= 400) {
-    return yellow(status);
-  } else if (status >= 300) {
-    return cyan(status);
-  } else {
-    return green(status);
-  }
-}
-
-function getDateTag() {
-  // Local date in ISO format, no ms.
-  const date = new Date();
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return gray(`[${date.toISOString().slice(0, -5)}]`);
 }

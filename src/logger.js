@@ -1,10 +1,15 @@
 import ConsoleLogger from './loggers/ConsoleLogger';
+import FormattedLogger from './loggers/FormattedLogger';
 import GoogleCloudLogger from './loggers/GoogleCloudLogger';
 
 let logger;
 
 export function useGoogleCloud(options) {
   logger = new GoogleCloudLogger(options);
+}
+
+export function useFormatted(options) {
+  logger = new FormattedLogger(options);
 }
 
 export function useConsole() {

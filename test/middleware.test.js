@@ -1,12 +1,15 @@
-import { getLast, getLastParsed, reset } from 'console';
-
-import { useConsole, useGoogleCloud } from '../src/logger';
+import { mockConsole, unmockConsole, getMessages } from './mocks/console';
+import { useFormatted, useGoogleCloud } from '../src/logger';
 import middleware from '../src/middleware';
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
 
-afterEach(() => {
-  reset();
+beforeEach(() => {
+  mockConsole();
+});
+
+afterAll(() => {
+  unmockConsole();
 });
 
 function createContext(obj) {
@@ -32,9 +35,9 @@ function createContext(obj) {
   };
 }
 
-describe('console middleware', () => {
+describe('formatted middleware', () => {
   beforeAll(() => {
-    useConsole();
+    useFormatted();
   });
 
   it('should log a request', () => {
@@ -52,9 +55,9 @@ describe('console middleware', () => {
       jest.advanceTimersByTime(100);
     });
     ctx.res.end();
-    expect(getLast()).toBe(
-      '[2020-01-01T00:00:00]  INFO POST   200 /foo 100ms 2KB'
-    );
+    expect(getMessages()).toEqual([
+      ['info', '[2020-01-01T00:00:00]  INFO POST   200 /foo 100ms 2KB'],
+    ]);
   });
 
   it('should ignore GCE health checks', () => {
@@ -70,7 +73,7 @@ describe('console middleware', () => {
     });
     middleware()(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 
   it('should ignore kubernetes health checks', () => {
@@ -86,7 +89,7 @@ describe('console middleware', () => {
     });
     middleware()(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 
   it('should ignoring custom headers by string', () => {
@@ -105,7 +108,7 @@ describe('console middleware', () => {
     });
     middleware(options)(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 
   it('should ignoring custom headers by regex', () => {
@@ -124,7 +127,7 @@ describe('console middleware', () => {
     });
     middleware(options)(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 });
 
@@ -148,7 +151,9 @@ describe('google cloud middleware', () => {
       jest.advanceTimersByTime(100);
     });
     ctx.res.end();
-    expect(getLastParsed()).toEqual({
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
       message: 'POST /foo 2KB - 100ms',
       severity: 'INFO',
       httpRequest: {
@@ -174,7 +179,7 @@ describe('google cloud middleware', () => {
     });
     middleware()(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 
   it('should ignore kubernetes health checks', () => {
@@ -190,6 +195,6 @@ describe('google cloud middleware', () => {
     });
     middleware()(ctx, () => {});
     ctx.res.end();
-    expect(getLast()).toBeUndefined();
+    expect(getMessages()).toEqual([]);
   });
 });
