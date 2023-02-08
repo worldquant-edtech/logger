@@ -1,6 +1,6 @@
 {
   "name": "@bedrockio/logger",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Structured logger for Bedrock applications.",
   "type": "module",
   "scripts": {
