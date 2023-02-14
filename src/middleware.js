@@ -4,6 +4,11 @@ import { formatRequest } from './logger';
 
 const IGNORE_UA_REG = /^(GoogleHC|kube-probe)/;
 
+/**
+ * @param {Object} [options]
+ * @param {RegExp[]|string[]} [options.ignoreUserAgents] An array of
+ * strings or regexes to test against.
+ */
 export default function middleware(options) {
   return (ctx, next) => {
     if (isAllowedRequest(ctx, options)) {
@@ -11,6 +16,7 @@ export default function middleware(options) {
       ctx.res.once('finish', () => {
         formatRequest({
           ...getRequestInfo(ctx),
+          // @ts-ignore
           latency: new Date() - start,
         });
       });

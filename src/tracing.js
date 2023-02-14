@@ -35,9 +35,7 @@ export function useGoogleCloudTracing(options = {}) {
       new MongooseInstrumentation(),
       new KoaInstrumentation(),
       new HttpInstrumentation({
-        http: {
-          ignoreIncomingPaths,
-        },
+        ignoreIncomingPaths,
       }),
     ],
     tracerProvider: provider,

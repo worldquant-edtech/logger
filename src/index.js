@@ -17,6 +17,11 @@ const DEFAULT_OPTIONS = {
   tracing: true,
 };
 
+/**
+ * @param {Object} [options]
+ * @param {boolean} [options.logging=true]
+ * @param {boolean|Object} [options.tracing=true]
+ */
 function setupGoogleCloud(options) {
   options = {
     ...DEFAULT_OPTIONS,
@@ -35,6 +40,20 @@ function setupGoogleCloud(options) {
     });
   }
 }
+
+export {
+  trace,
+  debug,
+  info,
+  warn,
+  error,
+  setupGoogleCloud,
+  formatRequest,
+  middleware,
+  useConsole,
+  useFormatted,
+  useGoogleCloud,
+};
 
 export default {
   trace,

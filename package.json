@@ -1,16 +1,18 @@
 {
   "name": "@bedrockio/logger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Structured logger for Bedrock applications.",
   "type": "module",
   "scripts": {
     "test": "jest",
     "lint": "eslint",
     "build": "scripts/build",
-    "prepublishOnly": "npm run build"
+    "types": "tsc",
+    "prepublishOnly": "yarn build && yarn types"
   },
-  "main": "dist/cjs/index.js",
-  "module": "src/index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./types/index.d.ts",
   "contributors": [
     {
       "name": "Kaare Larsen",

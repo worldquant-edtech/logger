@@ -36,8 +36,8 @@ export default class TagLogger {
     fn(msg, ...args);
   }
 
-  formatRequest(info) {
-    let { method, path, status, latency, size } = info;
+  formatRequest(request) {
+    let { method, path, status, latency, size } = request;
     const level = status < 500 ? 'info' : 'error';
     method = method.padEnd(6, ' ');
     status = this.formatStatus(status);

@@ -8,8 +8,8 @@ export function useGoogleCloud(options) {
   logger = new GoogleCloudLogger(options);
 }
 
-export function useFormatted(options) {
-  logger = new FormattedLogger(options);
+export function useFormatted() {
+  logger = new FormattedLogger();
 }
 
 export function useConsole() {
@@ -36,8 +36,18 @@ export function error(...args) {
   return logger['error'](...args);
 }
 
-export function formatRequest(...args) {
-  return logger['formatRequest'](...args);
+/**
+ * @param {Object} request
+ * @param {string} request.method
+ * @param {string} request.path
+ * @param {number} request.status
+ * @param {number} request.latency
+ * @param {string} request.size
+ *
+ * Formats a log for a request object from Koa.
+ */
+export function formatRequest(request) {
+  return logger['formatRequest'](request);
 }
 
 // Default to console logger
