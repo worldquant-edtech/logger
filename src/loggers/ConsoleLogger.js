@@ -1,8 +1,10 @@
 import { red, yellow, gray } from 'kleur';
 
+import BaseLogger from './BaseLogger';
+
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
-export default class TagLogger {
+export default class ConsoleLogger extends BaseLogger {
   debug(...args) {
     return this.emit('debug', ...args);
   }

@@ -1,6 +1,8 @@
 import consoleAsync from '../utils/async-console';
 import { isTTY } from '../utils/env';
 
+import BaseLogger from './BaseLogger';
+
 // Note: GCP severity levels are described here:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
 // For the purposes of common logging the following are used:
@@ -9,20 +11,7 @@ import { isTTY } from '../utils/env';
 // - WARNING
 // - ERROR
 
-const RESERVED_FIELDS = [
-  'message',
-  'severity',
-  'httpRequest',
-  'timestamp',
-  'time',
-  'log',
-];
-
-export default class GoogleCloudLogger {
-  constructor(options = {}) {
-    this.options = options;
-  }
-
+export default class GoogleCloudLogger extends BaseLogger {
   debug(...args) {
     return this.emit('DEBUG', ...args);
   }
@@ -41,7 +30,9 @@ export default class GoogleCloudLogger {
 
   emit(severity, ...args) {
     let message;
-    const jsonPayload = {};
+    const jsonPayload = {
+      metadata: this.options.metadata,
+    };
 
     args = printf(args);
 
@@ -57,24 +48,20 @@ export default class GoogleCloudLogger {
       return !isPrimitive(arg);
     });
 
-    if (complex.length > 1) {
+    if (complex.length > 1 || Array.isArray(complex[0])) {
       Object.assign(jsonPayload, {
-        args: complex,
+        metadata: {
+          ...jsonPayload.metadata,
+          arguments: complex,
+        },
       });
-    } else {
-      Object.assign(jsonPayload, complex[0]);
-    }
-
-    const stripped = [];
-    for (let field of RESERVED_FIELDS) {
-      if (field in jsonPayload) {
-        delete jsonPayload[field];
-        stripped.push(field);
-      }
-    }
-
-    if (stripped.length) {
-      this.warn(`Reserved fields [${stripped}] stripped from message.`);
+    } else if (complex.length) {
+      Object.assign(jsonPayload, {
+        metadata: {
+          ...jsonPayload.metadata,
+          ...complex[0],
+        },
+      });
     }
 
     this.emitPayload({

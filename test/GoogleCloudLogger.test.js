@@ -89,10 +89,12 @@ describe('complex logging', () => {
       [
         'log',
         {
-          foo: {
-            bar: 'baz',
-          },
           severity: 'INFO',
+          metadata: {
+            foo: {
+              bar: 'baz',
+            },
+          },
         },
       ],
     ]);
@@ -108,11 +110,13 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'an object {"foo": {...}}',
-          foo: {
-            bar: 'baz',
-          },
           severity: 'INFO',
+          message: 'an object {"foo": {...}}',
+          metadata: {
+            foo: {
+              bar: 'baz',
+            },
+          },
         },
       ],
     ]);
@@ -125,8 +129,9 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          0: 'foo',
-          1: 'bar',
+          metadata: {
+            arguments: [['foo', 'bar']],
+          },
         },
       ],
     ]);
@@ -138,9 +143,10 @@ describe('complex logging', () => {
       [
         'log',
         {
-          0: { foo: 'bar' },
-          1: { foo: 'bar' },
           severity: 'INFO',
+          metadata: {
+            arguments: [[{ foo: 'bar' }, { foo: 'bar' }]],
+          },
         },
       ],
     ]);
@@ -152,15 +158,24 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
-          args: [{ name: 'Joe' }, { name: 'Wendys' }],
           severity: 'INFO',
+          message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
+          metadata: {
+            arguments: [
+              {
+                name: 'Joe',
+              },
+              {
+                name: 'Wendys',
+              },
+            ],
+          },
         },
       ],
     ]);
   });
 
-  it('should not collide with other payload fields', async () => {
+  it('should allow payload fields as metadata', async () => {
     logger.info({
       foo: 'bar',
       message: 'foo',
@@ -175,16 +190,16 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message:
-            'Reserved fields [message,severity,httpRequest,timestamp,time,log] stripped from message.',
-          severity: 'WARNING',
-        },
-      ],
-      [
-        'log',
-        {
-          foo: 'bar',
           severity: 'INFO',
+          metadata: {
+            foo: 'bar',
+            message: 'foo',
+            severity: 'foo',
+            httpRequest: 'foo',
+            timestamp: 'foo',
+            time: 'foo',
+            log: 'foo',
+          },
         },
       ],
     ]);
@@ -196,10 +211,11 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'an array ["foo", [...]]',
-          0: 'foo',
-          1: ['bar', ['baz']],
           severity: 'INFO',
+          message: 'an array ["foo", [...]]',
+          metadata: {
+            arguments: [['foo', ['bar', ['baz']]]],
+          },
         },
       ],
     ]);
@@ -241,6 +257,65 @@ describe('printf style logging', () => {
         {
           message: 'foo -> 1000',
           severity: 'INFO',
+        },
+      ],
+    ]);
+  });
+});
+
+describe('contexts', () => {
+  it('should allow passing up metadata fields with a new context', async () => {
+    logger.context({ foo: 'bar' }).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          metadata: {
+            foo: 'bar',
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should merge metadata from context passed', async () => {
+    logger.context({ foo: 'foo' }).info('msg', { bar: 'bar' });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg {"bar": "bar"}',
+          metadata: {
+            foo: 'foo',
+            bar: 'bar',
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should handle context metadata with multiple arguments', async () => {
+    logger.context({ foo: 'foo' }).info('msg', { bar: 'bar' }, { baz: 'baz' });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg {"bar": "bar"} {"baz": "baz"}',
+          metadata: {
+            foo: 'foo',
+            arguments: [
+              {
+                bar: 'bar',
+              },
+              {
+                baz: 'baz',
+              },
+            ],
+          },
         },
       ],
     ]);
