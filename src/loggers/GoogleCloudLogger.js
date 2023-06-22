@@ -31,38 +31,12 @@ export default class GoogleCloudLogger extends BaseLogger {
   emit(severity, ...args) {
     let message;
     const jsonPayload = {
-      metadata: this.options.metadata,
+      context: this.options.context,
     };
 
     args = printf(args);
 
-    const hasMessage = args.some((arg) => {
-      return isPrimitive(arg);
-    });
-
-    if (hasMessage) {
-      message = args.map((arg) => dump(arg)).join(' ');
-    }
-
-    const complex = args.filter((arg) => {
-      return !isPrimitive(arg);
-    });
-
-    if (complex.length > 1 || Array.isArray(complex[0])) {
-      Object.assign(jsonPayload, {
-        metadata: {
-          ...jsonPayload.metadata,
-          arguments: complex,
-        },
-      });
-    } else if (complex.length) {
-      Object.assign(jsonPayload, {
-        metadata: {
-          ...jsonPayload.metadata,
-          ...complex[0],
-        },
-      });
-    }
+    message = args.map((arg) => dump(arg)).join(' ');
 
     this.emitPayload({
       severity,
@@ -125,15 +99,13 @@ function dump(arg, level = 0) {
     }
   } else if (!isPrimitive(arg)) {
     if (level < 1) {
-      const keys = Object.keys(arg).sort();
-      const hasMore = keys.length > 2;
+      const keys = Object.keys(arg);
       const str = keys
-        .slice(0, 2)
         .map((key) => {
           return `"${key}": ${dump(arg[key], level + 1)}`;
         })
-        .join(',');
-      return `{${str}${hasMore ? ',...' : ''}}`;
+        .join(', ');
+      return `{${str}}`;
     } else {
       return '{...}';
     }

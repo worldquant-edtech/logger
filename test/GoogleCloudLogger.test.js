@@ -79,10 +79,25 @@ describe('complex logging', () => {
     ]);
   });
 
-  it('should add an object to the JSON payload', async () => {
+  it('should stringify a shallow JSON payload', async () => {
+    logger.info({
+      foo: 'bar',
+    });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: '{"foo": "bar"}',
+        },
+      ],
+    ]);
+  });
+
+  it('should truncate a deep JSON payload', async () => {
     logger.info({
       foo: {
-        bar: 'baz',
+        bar: 'bar',
       },
     });
     expect(getParsedMessages()).toEqual([
@@ -90,11 +105,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          metadata: {
-            foo: {
-              bar: 'baz',
-            },
-          },
+          message: '{"foo": {...}}',
         },
       ],
     ]);
@@ -112,11 +123,6 @@ describe('complex logging', () => {
         {
           severity: 'INFO',
           message: 'an object {"foo": {...}}',
-          metadata: {
-            foo: {
-              bar: 'baz',
-            },
-          },
         },
       ],
     ]);
@@ -129,24 +135,20 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          metadata: {
-            arguments: [['foo', 'bar']],
-          },
+          message: '["foo", "bar"]',
         },
       ],
     ]);
   });
 
-  it('should log complex array as payload', async () => {
+  it('should truncate a complex array of objects', async () => {
     logger.info([{ foo: 'bar' }, { foo: 'bar' }]);
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
           severity: 'INFO',
-          metadata: {
-            arguments: [[{ foo: 'bar' }, { foo: 'bar' }]],
-          },
+          message: '[{...}, {...}]',
         },
       ],
     ]);
@@ -160,30 +162,15 @@ describe('complex logging', () => {
         {
           severity: 'INFO',
           message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
-          metadata: {
-            arguments: [
-              {
-                name: 'Joe',
-              },
-              {
-                name: 'Wendys',
-              },
-            ],
-          },
         },
       ],
     ]);
   });
 
-  it('should allow payload fields as metadata', async () => {
+  it('should stringify payload fields', async () => {
     logger.info({
-      foo: 'bar',
       message: 'foo',
       severity: 'foo',
-      httpRequest: 'foo',
-      timestamp: 'foo',
-      time: 'foo',
-      log: 'foo',
     });
 
     expect(getParsedMessages()).toEqual([
@@ -191,15 +178,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          metadata: {
-            foo: 'bar',
-            message: 'foo',
-            severity: 'foo',
-            httpRequest: 'foo',
-            timestamp: 'foo',
-            time: 'foo',
-            log: 'foo',
-          },
+          message: '{"message": "foo", "severity": "foo"}',
         },
       ],
     ]);
@@ -213,9 +192,6 @@ describe('complex logging', () => {
         {
           severity: 'INFO',
           message: 'an array ["foo", [...]]',
-          metadata: {
-            arguments: [['foo', ['bar', ['baz']]]],
-          },
         },
       ],
     ]);
@@ -264,7 +240,7 @@ describe('printf style logging', () => {
 });
 
 describe('contexts', () => {
-  it('should allow passing up metadata fields with a new context', async () => {
+  it('should allow structured logging with context fields', async () => {
     logger.context({ foo: 'bar' }).info('msg');
     expect(getParsedMessages()).toEqual([
       [
@@ -272,7 +248,7 @@ describe('contexts', () => {
         {
           severity: 'INFO',
           message: 'msg',
-          metadata: {
+          context: {
             foo: 'bar',
           },
         },
@@ -280,15 +256,15 @@ describe('contexts', () => {
     ]);
   });
 
-  it('should merge metadata from context passed', async () => {
-    logger.context({ foo: 'foo' }).info('msg', { bar: 'bar' });
+  it('should be able to merge contexts', async () => {
+    logger.context({ foo: 'foo' }).context({ bar: 'bar' }).info('msg');
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
           severity: 'INFO',
-          message: 'msg {"bar": "bar"}',
-          metadata: {
+          message: 'msg',
+          context: {
             foo: 'foo',
             bar: 'bar',
           },
@@ -297,24 +273,38 @@ describe('contexts', () => {
     ]);
   });
 
-  it('should handle context metadata with multiple arguments', async () => {
-    logger.context({ foo: 'foo' }).info('msg', { bar: 'bar' }, { baz: 'baz' });
+  it('should convert arrays to objects', async () => {
+    logger.context([{ foo: 'foo' }, { bar: 'bar' }]).info('msg');
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
           severity: 'INFO',
-          message: 'msg {"bar": "bar"} {"baz": "baz"}',
-          metadata: {
-            foo: 'foo',
-            arguments: [
-              {
-                bar: 'bar',
-              },
-              {
-                baz: 'baz',
-              },
-            ],
+          message: 'msg',
+          context: {
+            0: {
+              foo: 'foo',
+            },
+            1: {
+              bar: 'bar',
+            },
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should be immutable', async () => {
+    logger.context({ foo: 'foo' });
+    logger.context({ bar: 'bar' }).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          context: {
+            bar: 'bar',
           },
         },
       ],

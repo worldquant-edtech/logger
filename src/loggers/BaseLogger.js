@@ -6,13 +6,13 @@ export default class BaseLogger {
   /**
    * @returns {this}
    */
-  context(metadata) {
+  context(fields) {
     const clone = Object.create(this.constructor.prototype);
     clone.options = {
       ...this.options,
-      metadata: {
-        ...this.options.metadata,
-        ...metadata,
+      context: {
+        ...this.options.context,
+        ...fields,
       },
     };
     return clone;
