@@ -1,6 +1,8 @@
 import consoleAsync from '../utils/async-console';
 import { isTTY } from '../utils/env';
 
+import BaseLogger from './BaseLogger';
+
 // Note: GCP severity levels are described here:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
 // For the purposes of common logging the following are used:
@@ -9,20 +11,7 @@ import { isTTY } from '../utils/env';
 // - WARNING
 // - ERROR
 
-const RESERVED_FIELDS = [
-  'message',
-  'severity',
-  'httpRequest',
-  'timestamp',
-  'time',
-  'log',
-];
-
-export default class GoogleCloudLogger {
-  constructor(options = {}) {
-    this.options = options;
-  }
-
+export default class GoogleCloudLogger extends BaseLogger {
   debug(...args) {
     return this.emit('DEBUG', ...args);
   }
@@ -41,41 +30,13 @@ export default class GoogleCloudLogger {
 
   emit(severity, ...args) {
     let message;
-    const jsonPayload = {};
+    const jsonPayload = {
+      context: this.options.context,
+    };
 
     args = printf(args);
 
-    const hasMessage = args.some((arg) => {
-      return isPrimitive(arg);
-    });
-
-    if (hasMessage) {
-      message = args.map((arg) => dump(arg)).join(' ');
-    }
-
-    const complex = args.filter((arg) => {
-      return !isPrimitive(arg);
-    });
-
-    if (complex.length > 1) {
-      Object.assign(jsonPayload, {
-        args: complex,
-      });
-    } else {
-      Object.assign(jsonPayload, complex[0]);
-    }
-
-    const stripped = [];
-    for (let field of RESERVED_FIELDS) {
-      if (field in jsonPayload) {
-        delete jsonPayload[field];
-        stripped.push(field);
-      }
-    }
-
-    if (stripped.length) {
-      this.warn(`Reserved fields [${stripped}] stripped from message.`);
-    }
+    message = args.map((arg) => dump(arg)).join(' ');
 
     this.emitPayload({
       severity,
@@ -138,15 +99,13 @@ function dump(arg, level = 0) {
     }
   } else if (!isPrimitive(arg)) {
     if (level < 1) {
-      const keys = Object.keys(arg).sort();
-      const hasMore = keys.length > 2;
+      const keys = Object.keys(arg);
       const str = keys
-        .slice(0, 2)
         .map((key) => {
           return `"${key}": ${dump(arg[key], level + 1)}`;
         })
-        .join(',');
-      return `{${str}${hasMore ? ',...' : ''}}`;
+        .join(', ');
+      return `{${str}}`;
     } else {
       return '{...}';
     }

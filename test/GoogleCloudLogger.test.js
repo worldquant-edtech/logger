@@ -79,20 +79,33 @@ describe('complex logging', () => {
     ]);
   });
 
-  it('should add an object to the JSON payload', async () => {
+  it('should stringify a shallow JSON payload', async () => {
+    logger.info({
+      foo: 'bar',
+    });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: '{"foo": "bar"}',
+        },
+      ],
+    ]);
+  });
+
+  it('should truncate a deep JSON payload', async () => {
     logger.info({
       foo: {
-        bar: 'baz',
+        bar: 'bar',
       },
     });
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
-          foo: {
-            bar: 'baz',
-          },
           severity: 'INFO',
+          message: '{"foo": {...}}',
         },
       ],
     ]);
@@ -108,11 +121,8 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'an object {"foo": {...}}',
-          foo: {
-            bar: 'baz',
-          },
           severity: 'INFO',
+          message: 'an object {"foo": {...}}',
         },
       ],
     ]);
@@ -125,22 +135,20 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          0: 'foo',
-          1: 'bar',
+          message: '["foo", "bar"]',
         },
       ],
     ]);
   });
 
-  it('should log complex array as payload', async () => {
+  it('should truncate a complex array of objects', async () => {
     logger.info([{ foo: 'bar' }, { foo: 'bar' }]);
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
-          0: { foo: 'bar' },
-          1: { foo: 'bar' },
           severity: 'INFO',
+          message: '[{...}, {...}]',
         },
       ],
     ]);
@@ -152,39 +160,25 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
-          args: [{ name: 'Joe' }, { name: 'Wendys' }],
           severity: 'INFO',
+          message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
         },
       ],
     ]);
   });
 
-  it('should not collide with other payload fields', async () => {
+  it('should stringify payload fields', async () => {
     logger.info({
-      foo: 'bar',
       message: 'foo',
       severity: 'foo',
-      httpRequest: 'foo',
-      timestamp: 'foo',
-      time: 'foo',
-      log: 'foo',
     });
 
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
-          message:
-            'Reserved fields [message,severity,httpRequest,timestamp,time,log] stripped from message.',
-          severity: 'WARNING',
-        },
-      ],
-      [
-        'log',
-        {
-          foo: 'bar',
           severity: 'INFO',
+          message: '{"message": "foo", "severity": "foo"}',
         },
       ],
     ]);
@@ -196,10 +190,8 @@ describe('complex logging', () => {
       [
         'log',
         {
-          message: 'an array ["foo", [...]]',
-          0: 'foo',
-          1: ['bar', ['baz']],
           severity: 'INFO',
+          message: 'an array ["foo", [...]]',
         },
       ],
     ]);
@@ -241,6 +233,79 @@ describe('printf style logging', () => {
         {
           message: 'foo -> 1000',
           severity: 'INFO',
+        },
+      ],
+    ]);
+  });
+});
+
+describe('contexts', () => {
+  it('should allow structured logging with context fields', async () => {
+    logger.context({ foo: 'bar' }).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          context: {
+            foo: 'bar',
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should be able to merge contexts', async () => {
+    logger.context({ foo: 'foo' }).context({ bar: 'bar' }).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          context: {
+            foo: 'foo',
+            bar: 'bar',
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should convert arrays to objects', async () => {
+    logger.context([{ foo: 'foo' }, { bar: 'bar' }]).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          context: {
+            0: {
+              foo: 'foo',
+            },
+            1: {
+              bar: 'bar',
+            },
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('should be immutable', async () => {
+    logger.context({ foo: 'foo' });
+    logger.context({ bar: 'bar' }).info('msg');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: 'msg',
+          context: {
+            bar: 'bar',
+          },
         },
       ],
     ]);
