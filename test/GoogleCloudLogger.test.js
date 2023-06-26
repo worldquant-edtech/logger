@@ -65,6 +65,51 @@ describe('basic logging', () => {
   });
 });
 
+describe('error logging', () => {
+  it('should log an error object', async () => {
+    const error = new Error('Error!');
+    logger.error(error);
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          message: error.stack,
+          severity: 'ERROR',
+        },
+      ],
+    ]);
+  });
+
+  it('should be able to log multiple errors', async () => {
+    const error1 = new Error('Error 1');
+    const error2 = new Error('Error 2');
+    logger.error(error1, error2);
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          message: [error1.stack, error2.stack].join(' '),
+          severity: 'ERROR',
+        },
+      ],
+    ]);
+  });
+
+  it('should log error message with string after', async () => {
+    const error = new Error('Error!');
+    logger.error(error, 'hello!');
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          message: [error.stack, 'hello!'].join(' '),
+          severity: 'ERROR',
+        },
+      ],
+    ]);
+  });
+});
+
 describe('complex logging', () => {
   it('should concatenate multiple string arguments', async () => {
     logger.info('one', 'two');

@@ -97,6 +97,8 @@ function dump(arg, level = 0) {
     } else {
       return `[...]`;
     }
+  } else if (arg instanceof Error) {
+    return arg.stack;
   } else if (!isPrimitive(arg)) {
     if (level < 1) {
       const keys = Object.keys(arg);
