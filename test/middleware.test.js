@@ -166,6 +166,44 @@ describe('google cloud middleware', () => {
     });
   });
 
+  it('should add a userId in labels for an authenticated user', () => {
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 200,
+      state: {
+        authUser: {
+          id: 'fake-id',
+        },
+      },
+      response: {
+        headers: {
+          'content-length': '2048',
+        },
+      },
+    });
+    middleware()(ctx, () => {
+      jest.advanceTimersByTime(100);
+    });
+    ctx.res.end();
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
+      message: 'POST /foo 2KB - 100ms',
+      severity: 'INFO',
+      labels: {
+        userId: 'fake-id',
+      },
+      httpRequest: {
+        latency: '0.1s',
+        requestMethod: 'POST',
+        requestUrl: '/foo',
+        responseSize: '2048',
+        status: 200,
+      },
+    });
+  });
+
   it('should ignore GCE health checks', () => {
     const ctx = createContext({
       url: '/foo',
