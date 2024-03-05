@@ -191,9 +191,7 @@ describe('google cloud middleware', () => {
     expect(JSON.parse(message)).toEqual({
       message: 'POST /foo 2KB - 100ms',
       severity: 'INFO',
-      labels: {
-        userId: 'fake-id',
-      },
+      userId: 'fake-id',
       httpRequest: {
         latency: '0.1s',
         requestMethod: 'POST',

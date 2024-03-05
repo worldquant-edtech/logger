@@ -54,7 +54,7 @@ export default class GoogleCloudLogger extends BaseLogger {
     this.emitPayload({
       message,
       severity,
-      ...this.getLabels(info),
+      ...this.getAdditionalFields(info),
       httpRequest: {
         requestMethod: method,
         requestUrl: path,
@@ -71,12 +71,10 @@ export default class GoogleCloudLogger extends BaseLogger {
     });
   }
 
-  getLabels(info) {
+  getAdditionalFields(info) {
     if (info.userId) {
       return {
-        labels: {
-          userId: info.userId,
-        },
+        userId: info.userId,
       };
     }
   }
