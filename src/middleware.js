@@ -39,6 +39,7 @@ function getRequestInfo(ctx) {
   const requestLength = ctx.request.headers['content-length'];
   const responseLength = ctx.response.headers['content-length'];
   const size = bytes(Number(responseLength || 0));
+  const userId = ctx.state?.authUser?.id;
 
   const referer = headers['referer'];
   const userAgent = headers['user-agent'];
@@ -48,6 +49,7 @@ function getRequestInfo(ctx) {
 
   return {
     level,
+    userId,
     url: ctx.href,
     path: ctx.url,
     method: ctx.method,
