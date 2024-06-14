@@ -54,7 +54,9 @@ export default class GoogleCloudLogger extends BaseLogger {
     this.emitPayload({
       message,
       severity,
-      ...this.getAdditionalFields(info),
+      userId: info.userId,
+      requestBody: info.requestBody,
+      requestQuery: info.requestQuery,
       httpRequest: {
         requestMethod: method,
         requestUrl: path,
@@ -69,14 +71,6 @@ export default class GoogleCloudLogger extends BaseLogger {
         latency: `${latency / 1000}s`,
       },
     });
-  }
-
-  getAdditionalFields(info) {
-    if (info.userId) {
-      return {
-        userId: info.userId,
-      };
-    }
   }
 
   emitPayload(payload) {

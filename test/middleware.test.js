@@ -15,6 +15,7 @@ afterAll(() => {
 function createContext(obj) {
   let onFinish;
   return {
+    ...obj,
     res: {
       once(event, fn) {
         if (event === 'finish') {
@@ -26,12 +27,17 @@ function createContext(obj) {
       },
     },
     request: {
-      headers: {},
+      ...obj.request,
+      headers: {
+        ...obj.request?.headers,
+      },
     },
     response: {
-      headers: {},
+      ...obj.response,
+      headers: {
+        ...obj.response?.headers,
+      },
     },
-    ...obj,
   };
 }
 
@@ -162,6 +168,82 @@ describe('google cloud middleware', () => {
         requestUrl: '/foo',
         responseSize: '2048',
         status: 200,
+      },
+    });
+  });
+
+  it('should log body for errored POST request', () => {
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 400,
+      request: {
+        body: {
+          bar: 'baz',
+        },
+      },
+      response: {
+        headers: {
+          'content-length': '2048',
+        },
+      },
+    });
+    middleware()(ctx, () => {
+      jest.advanceTimersByTime(100);
+    });
+    ctx.res.end();
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
+      message: 'POST /foo 2KB - 100ms',
+      severity: 'INFO',
+      requestBody: {
+        bar: 'baz',
+      },
+      httpRequest: {
+        latency: '0.1s',
+        requestMethod: 'POST',
+        requestUrl: '/foo',
+        responseSize: '2048',
+        status: 400,
+      },
+    });
+  });
+
+  it('should log query for errored GET request', () => {
+    const ctx = createContext({
+      url: '/foo',
+      method: 'GET',
+      status: 400,
+      request: {
+        query: {
+          bar: 'baz',
+        },
+      },
+      response: {
+        headers: {
+          'content-length': '2048',
+        },
+      },
+    });
+    middleware()(ctx, () => {
+      jest.advanceTimersByTime(100);
+    });
+    ctx.res.end();
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
+      message: 'GET /foo 2KB - 100ms',
+      severity: 'INFO',
+      requestQuery: {
+        bar: 'baz',
+      },
+      httpRequest: {
+        latency: '0.1s',
+        requestMethod: 'GET',
+        requestUrl: '/foo',
+        responseSize: '2048',
+        status: 400,
       },
     });
   });

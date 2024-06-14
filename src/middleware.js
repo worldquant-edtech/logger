@@ -16,6 +16,7 @@ export default function middleware(options) {
       ctx.res.once('finish', () => {
         formatRequest({
           ...getRequestInfo(ctx),
+          ...getRequestParams(ctx),
           // @ts-ignore
           latency: new Date() - start,
         });
@@ -64,4 +65,15 @@ function getRequestInfo(ctx) {
     headers,
     size,
   };
+}
+
+function getRequestParams(ctx) {
+  if (ctx.status >= 400) {
+    return {
+      requestBody: ctx.request.body,
+      requestQuery: ctx.request.query,
+    };
+  } else {
+    return {};
+  }
 }
