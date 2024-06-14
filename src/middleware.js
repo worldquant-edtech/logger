@@ -16,7 +16,7 @@ export default function middleware(options) {
       ctx.res.once('finish', () => {
         formatRequest({
           ...getRequestInfo(ctx),
-          ...getRequestParams(ctx),
+          ...getRequestParams(ctx, options),
           // @ts-ignore
           latency: new Date() - start,
         });
@@ -67,13 +67,43 @@ function getRequestInfo(ctx) {
   };
 }
 
-function getRequestParams(ctx) {
+const BLACKLIST = /token|password|secret|hash|jwt/i;
+
+function getRequestParams(ctx, options) {
   if (ctx.status >= 400) {
+    const { body, query } = ctx.request;
     return {
-      requestBody: ctx.request.body,
-      requestQuery: ctx.request.query,
+      requestBody: strip(body, options),
+      requestQuery: strip(query, options),
     };
   } else {
     return {};
   }
+}
+
+function strip(arg, options) {
+  if (!arg || typeof arg !== 'object') {
+    return arg;
+  }
+
+  const result = {};
+  for (let [key, value] of Object.entries(arg)) {
+    if (!isBlacklisted(key, options)) {
+      result[key] = strip(value, options);
+    }
+  }
+  return result;
+}
+
+function isBlacklisted(key, options = {}) {
+  const { disallowedFields = [] } = options;
+  const disallowed = [BLACKLIST, ...disallowedFields];
+
+  return disallowed.some((el) => {
+    if (el instanceof RegExp) {
+      return el.test(key);
+    } else {
+      return el === key;
+    }
+  });
 }

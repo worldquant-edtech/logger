@@ -248,6 +248,114 @@ describe('google cloud middleware', () => {
     });
   });
 
+  it('should not expose sensitive fields in logged body', () => {
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 400,
+      request: {
+        body: {
+          bar: 'baz',
+          secret: 'BAD',
+          token: 'BAD',
+          password: 'BAD',
+          mySecret: 'BAD',
+          myToken: 'BAD',
+          myPassword: 'BAD',
+          user: {
+            bar: 'baz',
+            secret: 'BAD',
+            token: 'BAD',
+            password: 'BAD',
+            mySecret: 'BAD',
+            myToken: 'BAD',
+            myPassword: 'BAD',
+          },
+        },
+      },
+      response: {
+        headers: {
+          'content-length': '2048',
+        },
+      },
+    });
+    middleware()(ctx, () => {
+      jest.advanceTimersByTime(100);
+    });
+    ctx.res.end();
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
+      message: 'POST /foo 2KB - 100ms',
+      severity: 'INFO',
+      requestBody: {
+        bar: 'baz',
+        user: {
+          bar: 'baz',
+        },
+      },
+      httpRequest: {
+        latency: '0.1s',
+        requestMethod: 'POST',
+        requestUrl: '/foo',
+        responseSize: '2048',
+        status: 400,
+      },
+    });
+  });
+
+  it('should allow customization of blacklisted fields', () => {
+    const ctx = createContext({
+      url: '/foo',
+      method: 'POST',
+      status: 400,
+      request: {
+        body: {
+          bar: 'baz',
+          test1: 'test1',
+          test2: 'test2',
+          sensitive: 'sensitive',
+          user: {
+            bar: 'baz',
+            test1: 'test1',
+            test2: 'test2',
+            sensitive: 'sensitive',
+          },
+        },
+      },
+      response: {
+        headers: {
+          'content-length': '2048',
+        },
+      },
+    });
+    middleware({
+      disallowedFields: ['sensitive', /test\d/],
+    })(ctx, () => {
+      jest.advanceTimersByTime(100);
+    });
+    ctx.res.end();
+    const [level, message] = getMessages()[0];
+    expect(level).toBe('log');
+    expect(JSON.parse(message)).toEqual({
+      message: 'POST /foo 2KB - 100ms',
+      severity: 'INFO',
+      requestBody: {
+        bar: 'baz',
+        user: {
+          bar: 'baz',
+        },
+      },
+      httpRequest: {
+        latency: '0.1s',
+        requestMethod: 'POST',
+        requestUrl: '/foo',
+        responseSize: '2048',
+        status: 400,
+      },
+    });
+  });
+
   it('should add a userId in labels for an authenticated user', () => {
     const ctx = createContext({
       url: '/foo',
