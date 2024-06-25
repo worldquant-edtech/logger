@@ -14,11 +14,13 @@ import { MongooseInstrumentation } from '@opentelemetry/instrumentation-mongoose
 
 import { isTTY } from './utils/env';
 
+let config;
+
 export function useGoogleCloudTracing(options = {}) {
   // https://cloud.google.com/trace/docs/setup/nodejs-ot#gke
   // https://github.com/open-telemetry/opentelemetry-js/tree/main/packages/opentelemetry-sdk-trace-node
 
-  const { ignoreIncomingPaths = [] } = options;
+  config ||= options;
 
   const provider = new NodeTracerProvider();
 
@@ -35,13 +37,32 @@ export function useGoogleCloudTracing(options = {}) {
       new MongooseInstrumentation(),
       new KoaInstrumentation(),
       new HttpInstrumentation({
-        ignoreIncomingPaths,
+        ignoreIncomingRequestHook(incomingMessage) {
+          return isIgnoredRequest(incomingMessage.url);
+        },
       }),
     ],
     tracerProvider: provider,
   });
 
   provider.register();
+}
+
+function isIgnoredRequest(url) {
+  const { ignoreIncomingPaths } = config?.tracing || {};
+  if (ignoreIncomingPaths) {
+    return ignoreIncomingPaths.some((arg) => {
+      if (typeof arg === 'string') {
+        return arg === url;
+      } else if (arg instanceof RegExp) {
+        return arg.test(url);
+      } else {
+        return false;
+      }
+    });
+  } else {
+    return false;
+  }
 }
 
 export function getTracePayload() {
@@ -54,4 +75,8 @@ export function getTracePayload() {
       'logging.googleapis.com/trace_sampled': traceFlags === 1,
     };
   }
+}
+
+export function setCloudConfig(newConfig) {
+  config = newConfig;
 }

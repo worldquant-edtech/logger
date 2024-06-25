@@ -9,8 +9,13 @@ import {
   useFormatted,
   useGoogleCloud,
 } from './logger';
+import { isTTY, isCloudEnv } from './utils/env';
 import middleware from './middleware';
-import { useGoogleCloudTracing, getTracePayload } from './tracing';
+import {
+  useGoogleCloudTracing,
+  getTracePayload,
+  setCloudConfig,
+} from './tracing';
 
 const DEFAULT_OPTIONS = {
   logging: true,
@@ -41,18 +46,24 @@ function setupGoogleCloud(options) {
   }
 }
 
+if (isCloudEnv()) {
+  setupGoogleCloud();
+} else if (isTTY) {
+  useFormatted();
+}
+
 export {
   trace,
   debug,
   info,
   warn,
   error,
-  setupGoogleCloud,
   formatRequest,
   middleware,
   useConsole,
   useFormatted,
   useGoogleCloud,
+  setCloudConfig,
 };
 
 export default {
@@ -61,10 +72,10 @@ export default {
   info,
   warn,
   error,
-  setupGoogleCloud,
   formatRequest,
   middleware,
   useConsole,
   useFormatted,
   useGoogleCloud,
+  setCloudConfig,
 };
