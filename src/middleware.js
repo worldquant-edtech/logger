@@ -128,9 +128,13 @@ function getRequestParams(ctx, options) {
 function getRecordConfig(ctx, options) {
   const { recordParams = [] } = options;
   return recordParams.find((config) => {
-    const { status = 400, path } = config;
-    const reg = getRegExp(path);
-    return ctx.status >= status && reg.test(ctx.url);
+    const { status = 400, method, path } = config;
+    if (ctx.status < status) {
+      return false;
+    } else if (method && method !== ctx.method) {
+      return false;
+    }
+    return getRegExp(path).test(ctx.url);
   });
 }
 
@@ -169,8 +173,7 @@ function hasParam(key, arr) {
     return false;
   }
   return arr.some((arg) => {
-    const reg = getRegExp(arg);
-    return reg.test(key);
+    return getRegExp(arg).test(key);
   });
 }
 

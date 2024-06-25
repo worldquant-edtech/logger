@@ -51,21 +51,27 @@ function runRequest(ctx, config) {
 function assertBodyRecorded(expected) {
   const [level, message] = getMessages()[0];
   expect(level).toBe('log');
-  expect(JSON.parse(message)).toMatchObject({
-    ...(expected && {
+  const parsed = JSON.parse(message);
+  if (expected) {
+    expect(parsed).toMatchObject({
       requestBody: expected,
-    }),
-  });
+    });
+  } else {
+    expect(parsed).not.toHaveProperty('requestBody');
+  }
 }
 
 function assertQueryRecorded(expected) {
   const [level, message] = getMessages()[0];
   expect(level).toBe('log');
-  expect(JSON.parse(message)).toMatchObject({
-    ...(expected && {
+  const parsed = JSON.parse(message);
+  if (expected) {
+    expect(parsed).toMatchObject({
       requestQuery: expected,
-    }),
-  });
+    });
+  } else {
+    expect(parsed).not.toHaveProperty('requestQuery');
+  }
 }
 
 describe('formatted middleware', () => {
@@ -383,6 +389,28 @@ describe('google cloud middleware', () => {
       assertBodyRecorded({
         bar: 'baz',
       });
+    });
+
+    it('should match only PATCH requests', () => {
+      const ctx = createContext({
+        url: '/foo',
+        method: 'POST',
+        status: 400,
+        request: {
+          body: {
+            bar: 'baz',
+          },
+        },
+      });
+      runRequest(ctx, {
+        recordParams: [
+          {
+            method: 'PATCH',
+            path: '/foo',
+          },
+        ],
+      });
+      assertBodyRecorded(null);
     });
 
     it('should log query for errored GET request', () => {
