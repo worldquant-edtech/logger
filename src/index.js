@@ -64,6 +64,7 @@ export {
   useFormatted,
   useGoogleCloud,
   setCloudConfig,
+  setupGoogleCloud,
 };
 
 export default {
@@ -78,4 +79,5 @@ export default {
   useFormatted,
   useGoogleCloud,
   setCloudConfig,
+  setupGoogleCloud,
 };
