@@ -19,7 +19,9 @@ import {
 
 const DEFAULT_OPTIONS = {
   logging: true,
-  tracing: true,
+  tracing: {
+    ignoreIncomingPaths: ['/', /^\/1\/status\/*/],
+  },
 };
 
 /**
@@ -35,7 +37,7 @@ function setupGoogleCloud(options) {
 
   if (options.logging) {
     useGoogleCloud({
-      getTracePayload: getTracePayload,
+      getTracePayload,
     });
   }
 
