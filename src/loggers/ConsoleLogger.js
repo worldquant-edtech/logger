@@ -1,4 +1,4 @@
-import { red, yellow, gray } from 'kleur';
+import { red, yellow, gray } from 'kleur/colors';
 
 import BaseLogger from './BaseLogger';
 

@@ -1,4 +1,4 @@
-import { gray, yellow, red, cyan, green } from 'kleur';
+import { gray, yellow, red, cyan, green } from 'kleur/colors';
 
 import ConsoleLogger from './ConsoleLogger';
 
