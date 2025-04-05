@@ -1,4 +1,6 @@
-const DEFAULT_DEPTH = 3;
+import { inspect } from 'util';
+
+const DEFAULT_DEPTH = 2;
 
 export default class BaseLogger {
   constructor(options = {}) {
@@ -55,36 +57,10 @@ function printf(args) {
   return args;
 }
 
-function dump(arg, depth, level = 0) {
-  if (!depth) {
-    return JSON.stringify(arg, null, 2);
-  }
-  if (Array.isArray(arg)) {
-    if (level < depth) {
-      const str = arg.map((el) => dump(el, depth, level + 1)).join(', ');
-      return `[${str}]`;
-    } else {
-      return `[Array]`;
-    }
-  } else if (arg instanceof Error) {
-    return arg.stack;
-  } else if (!isPrimitive(arg)) {
-    if (level < depth) {
-      const keys = Object.keys(arg);
-      const str = keys
-        .map((key) => {
-          return `${key}: ${dump(arg[key], depth, level + 1)}`;
-        })
-        .join(', ');
-      return `{ ${str} }`;
-    } else {
-      return '[Object]';
-    }
+function dump(arg, depth) {
+  if (typeof arg === 'object') {
+    return inspect(arg, { depth });
   } else {
-    return level > 0 ? JSON.stringify(arg) : arg;
+    return String(arg);
   }
-}
-
-function isPrimitive(arg) {
-  return arg !== Object(arg);
 }
