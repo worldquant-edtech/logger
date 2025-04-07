@@ -5,6 +5,7 @@ const logger = new GoogleCloudLogger();
 
 beforeEach(() => {
   mockConsole();
+  logger.setInspectDepth(2);
 });
 
 afterAll(() => {
@@ -133,24 +134,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          message: '{"foo": "bar"}',
-        },
-      ],
-    ]);
-  });
-
-  it('should truncate a deep JSON payload', async () => {
-    logger.info({
-      foo: {
-        bar: 'bar',
-      },
-    });
-    expect(getParsedMessages()).toEqual([
-      [
-        'log',
-        {
-          severity: 'INFO',
-          message: '{"foo": {...}}',
+          message: "{ foo: 'bar' }",
         },
       ],
     ]);
@@ -167,7 +151,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          message: 'an object {"foo": {...}}',
+          message: "an object { foo: { bar: 'baz' } }",
         },
       ],
     ]);
@@ -180,20 +164,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          message: '["foo", "bar"]',
-        },
-      ],
-    ]);
-  });
-
-  it('should truncate a complex array of objects', async () => {
-    logger.info([{ foo: 'bar' }, { foo: 'bar' }]);
-    expect(getParsedMessages()).toEqual([
-      [
-        'log',
-        {
-          severity: 'INFO',
-          message: '[{...}, {...}]',
+          message: "[ 'foo', 'bar' ]",
         },
       ],
     ]);
@@ -206,7 +177,7 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          message: 'a user {"name": "Joe"} and a shop {"name": "Wendys"}',
+          message: "a user { name: 'Joe' } and a shop { name: 'Wendys' }",
         },
       ],
     ]);
@@ -223,20 +194,148 @@ describe('complex logging', () => {
         'log',
         {
           severity: 'INFO',
-          message: '{"message": "foo", "severity": "foo"}',
+          message: "{ message: 'foo', severity: 'foo' }",
+        },
+      ],
+    ]);
+  });
+});
+
+describe('truncation depth', () => {
+  it('should match console default truncation depth', async () => {
+    logger.info({
+      foo: {
+        bar: {
+          baz: {
+            qux: 'qux',
+          },
+        },
+      },
+    });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: '{ foo: { bar: { baz: [Object] } } }',
+        },
+      ],
+    ]);
+  });
+
+  it('should allow a lower depth to be set', async () => {
+    logger.setInspectDepth(1);
+    logger.info({
+      foo: {
+        bar: {
+          baz: {
+            qux: 'qux',
+          },
+        },
+      },
+    });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: '{ foo: { bar: [Object] } }',
+        },
+      ],
+    ]);
+  });
+
+  it('should allow a higher depth to be set', async () => {
+    logger.setInspectDepth(3);
+    logger.info({
+      foo: {
+        bar: {
+          baz: {
+            qux: 'qux',
+          },
+        },
+      },
+    });
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: `{
+  foo: { bar: { baz: { qux: 'qux' } } }
+}`,
+        },
+      ],
+    ]);
+  });
+
+  it('should allow no depth max to be set', async () => {
+    logger.setInspectDepth(null);
+    logger.info({
+      foo: {
+        bar: {
+          baz: {
+            qux: 'qux',
+          },
+        },
+      },
+    });
+    const expected = `{
+  foo: { bar: { baz: { qux: 'qux' } } }
+}`.trim();
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: expected,
+        },
+      ],
+    ]);
+  });
+
+  it('should truncate a complex array of objects', async () => {
+    const obj = { foo: { bar: 'baz' } };
+
+    logger.setInspectDepth(1);
+    logger.info([obj, obj]);
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: '[ { foo: [Object] }, { foo: [Object] } ]',
         },
       ],
     ]);
   });
 
   it('should truncate nested arrays in message', async () => {
+    logger.setInspectDepth(1);
     logger.info('an array', ['foo', ['bar', ['baz']]]);
     expect(getParsedMessages()).toEqual([
       [
         'log',
         {
           severity: 'INFO',
-          message: 'an array ["foo", [...]]',
+          message: "an array [ 'foo', [ 'bar', [Array] ] ]",
+        },
+      ],
+    ]);
+  });
+
+  it('should handle unbounded cyclic object', async () => {
+    logger.setInspectDepth(null);
+    const obj = { foo: 'bar' };
+    obj.bar = obj;
+    logger.info(obj);
+
+    expect(getParsedMessages()).toEqual([
+      [
+        'log',
+        {
+          severity: 'INFO',
+          message: "<ref *1> { foo: 'bar', bar: [Circular *1] }",
         },
       ],
     ]);

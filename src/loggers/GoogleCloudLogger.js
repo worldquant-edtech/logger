@@ -29,14 +29,11 @@ export default class GoogleCloudLogger extends BaseLogger {
   }
 
   emit(severity, ...args) {
-    let message;
     const jsonPayload = {
       context: this.options.context,
     };
 
-    args = printf(args);
-
-    message = args.map((arg) => dump(arg)).join(' ');
+    const message = this.getMessage(args);
 
     this.emitPayload({
       severity,
@@ -86,52 +83,4 @@ export default class GoogleCloudLogger extends BaseLogger {
 function log(msg) {
   const console = isTTY ? global.console : consoleAsync;
   console.log(msg);
-}
-
-function isPrimitive(arg) {
-  return arg !== Object(arg);
-}
-
-function dump(arg, level = 0) {
-  if (Array.isArray(arg)) {
-    if (level < 1) {
-      const str = arg.map((el) => dump(el, level + 1)).join(', ');
-      return `[${str}]`;
-    } else {
-      return `[...]`;
-    }
-  } else if (arg instanceof Error) {
-    return arg.stack;
-  } else if (!isPrimitive(arg)) {
-    if (level < 1) {
-      const keys = Object.keys(arg);
-      const str = keys
-        .map((key) => {
-          return `"${key}": ${dump(arg[key], level + 1)}`;
-        })
-        .join(', ');
-      return `{${str}}`;
-    } else {
-      return '{...}';
-    }
-  } else {
-    return level > 0 ? JSON.stringify(arg) : arg;
-  }
-}
-
-const PRINTF_REG = /%(s|d|i)/g;
-
-function printf(args) {
-  let [first] = args;
-  if (typeof first === 'string') {
-    first = first.replace(PRINTF_REG, (all, op) => {
-      let inject = args.splice(1, 1)[0];
-      if (op === 'd' || op === 'i') {
-        inject = Number(inject);
-      }
-      return inject;
-    });
-    args[0] = first;
-  }
-  return args;
 }
