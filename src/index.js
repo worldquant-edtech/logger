@@ -48,9 +48,9 @@ function setupGoogleCloud(options) {
   }
 }
 
-if (isCloudEnv()) {
+if (isCloudEnv() && !isTTY) {
   setupGoogleCloud();
-} else if (isTTY) {
+} else {
   useFormatted();
 }
 
