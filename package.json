@@ -1,6 +1,6 @@
 {
-  "name": "@bedrockio/logger",
-  "version": "1.1.5",
+  "name": "@wqlearning/logger",
+  "version": "2.0.0",
   "description": "Structured logger for Bedrock applications.",
   "type": "module",
   "scripts": {
@@ -40,6 +40,7 @@
     "@opentelemetry/sdk-trace-base": "^1.29.0",
     "@opentelemetry/sdk-trace-node": "^1.29.0",
     "@opentelemetry/semantic-conventions": "^1.28.0",
+    "@sentry/node": "^10.15.0",
     "bytes": "^3.1.2",
     "kleur": "^4.1.5",
     "stdout-stream": "^2.0.0"
@@ -48,7 +49,6 @@
     "@babel/cli": "^7.26.4",
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
-    "@bedrockio/prettier-config": "^1.0.2",
     "babel-plugin-add-module-exports": "^1.0.4",
     "eslint": "^8.33.0",
     "eslint-plugin-bedrock": "^1.0.21",
