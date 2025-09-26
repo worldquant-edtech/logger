@@ -1,7 +1,7 @@
 {
   "name": "@wqlearning/logger",
   "version": "2.0.0",
-  "description": "Structured logger for Bedrock applications.",
+  "description": "Structured logger koa applications.",
   "type": "module",
   "scripts": {
     "test": "jest",
@@ -26,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bedrockio/logger"
+    "url": "https://github.com/worldquant-edtech/logger"
   },
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
