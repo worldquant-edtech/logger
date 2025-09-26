@@ -1,4 +1,4 @@
-# @bedrockio/logger
+# @wqlearning/logger
 
 Structured logger that targets both the console and remote cloud formats. This
 includes:
@@ -7,17 +7,18 @@ includes:
 - Request logging [middleware](#middleware).
 - Google Cloud structured logger.
 - Google Cloud batched tracing via [OpenTelemetry](https://opentelemetry.io/).
+- Logger for Sentry
 
 ## Install
 
 ```bash
-yarn install @bedrockio/logger
+yarn install @wqlearning/logger
 ```
 
 ## Usage
 
 ```js
-const logger = require('@bedrockio/logger');
+const logger = require('@wqlearning/logger');
 logger.setupGoogleCloud({
   // Set up gcloud structured logging. Default true.
   logging: true,
@@ -34,7 +35,7 @@ application.
 Enable both logging and tracing and tell the tracing to ignore specific paths.
 
 ```js
-const logger = require('@bedrockio/logger');
+const logger = require('@wqlearning/logger');
 logger.setupGoogleCloud({
   tracing: {
     ignoreIncomingPaths: ['/'],
@@ -125,7 +126,7 @@ Koa middleware that logs HTTP requests:
 
 ```js
 const Koa = require('koa');
-const logger = require('@bedrockio/logging');
+const logger = require('@wqlearning/logging');
 
 const app = new Koa();
 app.use(logger.middleware());
