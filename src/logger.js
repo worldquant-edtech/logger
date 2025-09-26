@@ -1,6 +1,7 @@
 import ConsoleLogger from './loggers/ConsoleLogger';
 import FormattedLogger from './loggers/FormattedLogger';
 import GoogleCloudLogger from './loggers/GoogleCloudLogger';
+import SentryLogger from './loggers/SentryLogger';
 
 let logger;
 
@@ -14,6 +15,10 @@ export function useFormatted() {
 
 export function useConsole() {
   logger = new ConsoleLogger();
+}
+
+export function useSentry(options) {
+  logger = new SentryLogger(options);
 }
 
 export function trace(...args) {

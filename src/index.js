@@ -8,6 +8,7 @@ import {
   useConsole,
   useFormatted,
   useGoogleCloud,
+  useSentry,
 } from './logger';
 import { isTTY, isCloudEnv } from './utils/env';
 import middleware from './middleware';
@@ -54,6 +55,17 @@ if (isCloudEnv() && !isTTY) {
   useFormatted();
 }
 
+function setupSentry(options) {
+  options = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  };
+
+  if (options.logging) {
+    useSentry(options);
+  }
+}
+
 export {
   trace,
   debug,
@@ -65,8 +77,10 @@ export {
   useConsole,
   useFormatted,
   useGoogleCloud,
+  useSentry,
   setCloudConfig,
   setupGoogleCloud,
+  setupSentry,
 };
 
 export default {
@@ -80,6 +94,8 @@ export default {
   useConsole,
   useFormatted,
   useGoogleCloud,
+  useSentry,
   setCloudConfig,
   setupGoogleCloud,
+  setupSentry,
 };
