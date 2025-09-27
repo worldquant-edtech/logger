@@ -1,19 +1,17 @@
 import ConsoleLogger from './ConsoleLogger';
-import consoleAsync from '../utils/async-console';
-import { isTTY } from '../utils/env';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 
-const Sentry = require('@sentry/node');
+const { SentryLogger: SentryWrapper } = require('@wqlearning/sentry-logger');
 
 export default class SentryLogger extends ConsoleLogger {
+  logger = null;
   constructor(options) {
     super(options);
-    Sentry.init({
+    this.logger = new SentryWrapper({
+      serviceName: process.env.SERVICE_NAME || options?.serviceName,
       dsn: process.env.SENTRY_DSN || options?.dsn,
-      release: process.env.SENTRY_RELEASE || options?.release,
-      environment: process.env.ENV_NAME || options?.environment || 'local',
-      enableLogs: true,
+      env: process.env.ENV_NAME || options?.environment || 'local',
     });
   }
 
@@ -40,7 +38,7 @@ export default class SentryLogger extends ConsoleLogger {
   }
 
   print(level, ...args) {
-    const fn = Sentry.logger[level];
+    const fn = this.logger[level];
     let msg = `${this.getDateTag()} ${this.getLevelTag(level)}`;
     if (typeof args[0] === 'string') {
       const [first, ...rest] = args;
@@ -70,25 +68,19 @@ export default class SentryLogger extends ConsoleLogger {
     let { method, path, status, latency, size } = info;
     const message = `${method} ${path} ${size} - ${latency}ms`;
     if (status < 500) {
-      Sentry.logger.info(message, {
+      this.logger.info(message, {
         'user.id': info.userId,
         latency: latency,
         size: size,
       });
     } else {
-      Sentry.logger.error(message, {
+      this.logger.error(message, {
         'user.id': info.userId,
         latency: latency,
         size: size,
       });
     }
   }
-}
-
-// Wrap this to allow testing.
-function log(msg) {
-  const console = isTTY ? global.console : consoleAsync;
-  console.log(msg);
 }
 
 function getMinLevel() {
