@@ -40,7 +40,7 @@
     "@opentelemetry/sdk-trace-base": "^1.29.0",
     "@opentelemetry/sdk-trace-node": "^1.29.0",
     "@opentelemetry/semantic-conventions": "^1.28.0",
-    "@wqlearning/sentry-logger": "^1.0.9",
+    "@wqlearning/sentry-logger": "^1.0.10",
     "bytes": "^3.1.2",
     "kleur": "^4.1.5",
     "stdout-stream": "^2.0.0"

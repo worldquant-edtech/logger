@@ -2042,10 +2042,10 @@
   resolved "https://registry.npmjs.org/@ungap/structured-clone/-/structured-clone-1.2.1.tgz"
   integrity sha512-fEzPV3hSkSMltkw152tJKNARhOupqbH96MZWyRjNaYZOMIzbrTeQDG+MTc6Mr2pgzFQzFxAfmhGDNP5QK++2ZA==
 
-"@wqlearning/sentry-logger@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@wqlearning/sentry-logger/-/sentry-logger-1.0.9.tgz#1a4194aa9701ec9b228cfdcf92ee0deff6cff255"
-  integrity sha512-ZFILStyy6tiTsRZC/Zq28q5jJbZxf4T//c2FwJwDJj28n70ctZbyGlPvgJoncOTblxPXUpGR0WTHvFDvta2HSg==
+"@wqlearning/sentry-logger@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@wqlearning/sentry-logger/-/sentry-logger-1.0.10.tgz#fbd883b422a01362db02b9e9056168fa6abd005a"
+  integrity sha512-Zl0SkCZFl3IXtQu/8z9hjBX+K2eOQYmq2vuwPeKmCQGG67FdCtIMF4PfkGZ/++haPBImgjfdpn+A9T8RzEKTyA==
   dependencies:
     "@sentry/node" "^10.15.0"
 
