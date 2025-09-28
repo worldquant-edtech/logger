@@ -1,6 +1,7 @@
 import ConsoleLogger from './ConsoleLogger';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+const MIN_LEVEL = process.env.LOG_LEVEL || 'info';
 
 const { SentryLogger: SentryWrapper } = require('@wqlearning/sentry-logger');
 
@@ -9,9 +10,8 @@ export default class SentryLogger extends ConsoleLogger {
   constructor(options) {
     super(options);
     this.logger = new SentryWrapper({
-      serviceName: process.env.SERVICE_NAME || options?.serviceName,
       dsn: process.env.SENTRY_DSN || options?.dsn,
-      env: process.env.ENV_NAME || options?.environment || 'local',
+      env: process.env.ENV_NAME || options?.env || 'local',
     });
   }
 
@@ -84,7 +84,7 @@ export default class SentryLogger extends ConsoleLogger {
 }
 
 function getMinLevel() {
-  const minLevel = LOG_LEVELS.indexOf(process.env.LOG_LEVEL || 'info');
+  const minLevel = LOG_LEVELS.indexOf(MIN_LEVEL);
   if (minLevel === -1) {
     throw new Error(`Invalid log level. Must be one of ${LOG_LEVELS}`);
   }
