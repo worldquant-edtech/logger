@@ -42,10 +42,14 @@ export function error(...args) {
 }
 
 export function getLoggerType() {
-  if (!logger) {
+  if (!logger || !logger.getLoggerType) {
     return 'ConsoleLogger';
   }
   return logger.getLoggerType();
+}
+
+export function getLogger() {
+  return logger;
 }
 
 /**
