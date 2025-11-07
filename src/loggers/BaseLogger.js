@@ -7,6 +7,10 @@ export default class BaseLogger {
     this.options = options;
   }
 
+  getLoggerType() {
+    return this.constructor?.name || 'BaseLogger';
+  }
+
   /**
    * @returns {this}
    */

@@ -65,20 +65,21 @@ export default class SentryLogger extends ConsoleLogger {
   }
 
   formatRequest(info) {
-    let { method, path, status, latency, size } = info;
+    let { method, path, status, latency, size, fileExt } = info;
     const message = `${method} ${path} ${size} - ${latency}ms`;
+    const latencyGroup = latency < 100 ? 'fast' : latency < 500 ? 'medium' : 'slow';
+    const meta = {
+      latencyGroup,
+      size,
+      status,
+    };
+    if (fileExt) {
+      meta.fileExt = fileExt;
+    }
     if (status < 500) {
-      this.logger.info(message, {
-        'user.id': info.userId,
-        latency: latency,
-        size: size,
-      });
+      this.logger.info(message, meta);
     } else {
-      this.logger.error(message, {
-        'user.id': info.userId,
-        latency: latency,
-        size: size,
-      });
+      this.logger.error(message, meta);
     }
   }
 }
