@@ -93,7 +93,7 @@ function getRequestInfo(ctx) {
   const remoteIp = headers['x-forwarded-for'];
   const serverIp = ctx.ip;
 
-  const path = ctx.url;
+  const path = ctx.url || '';
   let fileExt = path.split('.').pop();
   if (fileExt.length > 5) {
     fileExt = '';
