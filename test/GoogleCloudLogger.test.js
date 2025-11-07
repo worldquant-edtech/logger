@@ -39,6 +39,10 @@ describe('basic logging', () => {
     ]);
   });
 
+  it('should return logger type', async () => {
+    expect(logger.getLoggerType()).toBe('GoogleCloudLogger');
+  });
+
   it('should log warn', async () => {
     logger.warn('msg');
     expect(getParsedMessages()).toEqual([

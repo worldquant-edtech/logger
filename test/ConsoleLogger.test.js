@@ -55,6 +55,10 @@ describe('basic logging', () => {
     process.env.LOG_LEVEL = 'info';
   });
 
+  it('should return logger type', async () => {
+    expect(logger.getLoggerType()).toBe('ConsoleLogger');
+  });
+
   it('should format a successful request', async () => {
     logger.formatRequest({
       method: 'POST',
