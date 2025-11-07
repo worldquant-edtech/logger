@@ -1,6 +1,6 @@
 {
   "name": "@wqlearning/logger",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Structured logger koa applications.",
   "type": "module",
   "scripts": {
