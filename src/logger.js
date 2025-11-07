@@ -41,6 +41,13 @@ export function error(...args) {
   return logger['error'](...args);
 }
 
+export function getLoggerType() {
+  if (!logger) {
+    return 'ConsoleLogger';
+  }
+  return logger.getLoggerType();
+}
+
 /**
  * @param {Object} request
  * @param {string} request.method
