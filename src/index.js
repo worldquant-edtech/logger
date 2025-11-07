@@ -9,6 +9,7 @@ import {
   useFormatted,
   useGoogleCloud,
   useSentry,
+  getLoggerType,
 } from './logger';
 import { isTTY, isCloudEnv } from './utils/env';
 import middleware from './middleware';
@@ -81,6 +82,7 @@ export {
   setCloudConfig,
   setupGoogleCloud,
   setupSentry,
+  getLoggerType,
 };
 
 export default {
@@ -98,4 +100,5 @@ export default {
   setCloudConfig,
   setupGoogleCloud,
   setupSentry,
+  getLoggerType,
 };
