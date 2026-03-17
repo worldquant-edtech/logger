@@ -43,7 +43,8 @@
     "eslint-plugin-bedrock": "^1.0.21",
     "jest": "30.3",
     "koa": "^3.1.2",
-    "prettier-eslint": "16.4"
+    "prettier-eslint": "16.4",
+    "typescript": "^5.9.3"
   },
   "volta": {
     "node": "24.14.0",
