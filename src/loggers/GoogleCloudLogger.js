@@ -71,10 +71,6 @@ export default class GoogleCloudLogger extends BaseLogger {
   }
 
   emitPayload(payload) {
-    const { getTracePayload } = this.options;
-    if (getTracePayload) {
-      Object.assign(payload, getTracePayload());
-    }
     log(JSON.stringify(payload));
   }
 }

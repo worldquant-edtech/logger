@@ -13,23 +13,14 @@ import {
 } from './logger';
 import { isTTY, isCloudEnv } from './utils/env';
 import middleware from './middleware';
-import {
-  useGoogleCloudTracing,
-  getTracePayload,
-  setCloudConfig,
-} from './tracing';
 
 const DEFAULT_OPTIONS = {
   logging: true,
-  tracing: {
-    ignoreIncomingPaths: ['/', /^\/1\/status\/*/],
-  },
 };
 
 /**
  * @param {Object} [options]
  * @param {boolean} [options.logging=true]
- * @param {boolean|Object} [options.tracing=true]
  */
 function setupGoogleCloud(options) {
   options = {
@@ -38,15 +29,7 @@ function setupGoogleCloud(options) {
   };
 
   if (options.logging) {
-    useGoogleCloud({
-      getTracePayload,
-    });
-  }
-
-  if (options.tracing) {
-    useGoogleCloudTracing({
-      ignoreIncomingPaths: options.tracing?.ignoreIncomingPaths,
-    });
+    useGoogleCloud();
   }
 }
 
@@ -79,7 +62,6 @@ export {
   useFormatted,
   useGoogleCloud,
   useSentry,
-  setCloudConfig,
   setupGoogleCloud,
   setupSentry,
   getLoggerType,
@@ -97,7 +79,6 @@ export default {
   useFormatted,
   useGoogleCloud,
   useSentry,
-  setCloudConfig,
   setupGoogleCloud,
   setupSentry,
   getLoggerType,

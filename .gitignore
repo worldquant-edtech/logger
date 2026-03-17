@@ -3,3 +3,9 @@ types
 .vscode
 yarn-error.log
 node_modules
+
+# Yarn v4
+.yarn/*
+!.yarn/releases
+!.yarn/patches
+!.yarn/plugins

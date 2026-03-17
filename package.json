@@ -29,17 +29,6 @@
     "url": "https://github.com/worldquant-edtech/logger"
   },
   "dependencies": {
-    "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/core": "^1.29.0",
-    "@opentelemetry/instrumentation": "^0.56.0",
-    "@opentelemetry/instrumentation-http": "^0.56.0",
-    "@opentelemetry/instrumentation-koa": "^0.46.0",
-    "@opentelemetry/instrumentation-mongoose": "^0.45.0",
-    "@opentelemetry/resources": "^1.29.0",
-    "@opentelemetry/sdk-trace-base": "^1.29.0",
-    "@opentelemetry/sdk-trace-node": "^1.29.0",
-    "@opentelemetry/semantic-conventions": "^1.28.0",
     "@wqlearning/sentry-logger": "^1.0.10",
     "bytes": "^3.1.2",
     "kleur": "^4.1.5",
@@ -50,14 +39,15 @@
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
     "babel-plugin-add-module-exports": "^1.0.4",
-    "eslint": "^8.33.0",
+    "eslint": "^10.0.3",
     "eslint-plugin-bedrock": "^1.0.21",
-    "jest": "^29.4.1",
-    "koa": "^2.14.1",
-    "prettier-eslint": "^15.0.1"
+    "jest": "30.3",
+    "koa": "^3.1.2",
+    "prettier-eslint": "16.4"
   },
   "volta": {
-    "node": "22.12.0",
-    "yarn": "1.22.22"
-  }
+    "node": "24.14.0",
+    "yarn": "4.12.0"
+  },
+  "packageManager": "yarn@4.12.0"
 }
